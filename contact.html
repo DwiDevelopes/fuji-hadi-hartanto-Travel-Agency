@@ -8,6 +8,7 @@
     <meta content="" name="keywords">
     <meta content="" name="description">
     <link rel="icon" type="image/x-icon" href="logo/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Favicon -->
     <link href="img/favicon.ico" rel="icon">
@@ -238,6 +239,7 @@
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="hotel_find.html">Destinations</a></li>
+            <li><a href="hotel_pilihan.html">Hotels</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
@@ -248,28 +250,230 @@
             <div class="line3"></div>
         </div>
     </nav>
+    
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const navItems = document.querySelectorAll('.nav-links li');
+    
+        hamburger.addEventListener('click', () => {
+            // Toggle nav
+            navLinks.classList.toggle('open');
+            
+            // Animate links
+            navItems.forEach((link, index) => {
+                if (link.style.animation) {
+                    link.style.animation = '';
+                } else {
+                    link.style.animation = `navLinkFade 0.4s ease forwards ${index / 7 + 0.2}s`;
+                }
+            });
+            
+            // Hamburger animation
+            hamburger.classList.toggle('toggle');
+        });
+    </script>
 
     <div class="container-fluid bg-primary py-5 mb-5 hero-header">
         <div class="container py-5">
             <div class="row justify-content-center py-5">
                 <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
                     <img src="logo/favicon.png" alt="Logo" class="img-fluid mb-4 animated slideInDown" style="width: 200px;">
-                    <h1 class="display-3 text-white mb-3 animated slideInDown">Enjoy Your Vacation With Us</h1>
-                    <p class="fs-4 text-white mb-4 animated slideInDown">is an invitation
-                        or offer to experience a memorable holiday with a particular service or destination. It
-                        typically refers to a vacation package provided by a travel agency, hotel, or tourist spot,
-                        aiming to offer a fun and unforgettable holiday experience.</p>
+                    <h1 class="display-3 text-white mb-3 animated slideInDown">Discover Your Dream Destination</h1>
+                    <p class="fs-4 text-white mb-4 animated slideInDown">Explore breathtaking locations for your next vacation</p>
                     <div class="position-relative w-75 mx-auto animated slideInDown">
                         <input class="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5" type="text"
-                            placeholder="Eg: Thailand">
+                            id="destinationSearch" placeholder="Search destinations (e.g. Thailand, Bali, Paris)">
                         <button type="button"
                             class="btn btn-primary rounded-pill py-2 px-4 position-absolute top-0 end-0 me-2"
-                            style="margin-top: 7px;">Search</button>
+                            style="margin-top: 7px;" onclick="searchDestination()">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
                     </div>
+                    <div id="searchResults" class="row mt-5 g-4 justify-content-center"></div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <style>
+        .destination-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            height: 100%;
+            background: white;
+        }
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .destination-img {
+            height: 280px;
+            object-fit: cover;
+            width: 100%;
+            transition: transform 0.5s ease;
+        }
+        .destination-card:hover .destination-img {
+            transform: scale(1.05);
+        }
+        .img-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 20px;
+            color: white;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .photographer-badge {
+            background: rgba(0,0,0,0.7);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .view-package-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .view-package-btn:hover {
+            background: transparent !important;
+            border-color: var(--bs-primary);
+            color: var(--bs-primary) !important;
+        }
+    </style>
+    
+    <script>
+    // Replace with your actual Unsplash Access Key
+    const UNSPLASH_ACCESS_KEY = 'bNf1fq2p6XENfQnZ6KAne40raJcwkzxFs4DWTvZHuY8'; 
+    
+    async function searchDestination() {
+        const query = document.getElementById('destinationSearch').value.trim();
+        if (!query) {
+            showAlert('Please enter a destination to search', 'warning');
+            return;
+        }
+        
+        const resultsContainer = document.getElementById('searchResults');
+        showLoadingState(resultsContainer, query);
+        
+        try {
+            const photos = await fetchUnsplashPhotos(query);
+            displayResults(resultsContainer, query, photos);
+        } catch (error) {
+            console.error('Search error:', error);
+            showAlert('Failed to load destinations. Please try again.', 'danger');
+            resultsContainer.innerHTML = '';
+        }
+    }
+    
+    function showLoadingState(container, query) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-white mt-3">Finding the best ${query} destinations for you...</p>
+            </div>`;
+    }
+    
+    async function fetchUnsplashPhotos(query) {
+        const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query + ' vacation')}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=3&orientation=landscape`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.results.map(photo => ({
+            url: photo.urls.regular,
+            alt: photo.alt_description || query + ' vacation',
+            photographer: photo.user.name,
+            photographerUrl: photo.user.links.html,
+            location: photo.location?.title || 'Exotic Destination'
+        }));
+    }
+    
+    function displayResults(container, query, photos) {
+        container.innerHTML = '';
+        
+        if (!photos || photos.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-3">
+                    <div class="alert alert-warning">
+                        No results found for "${query}". Try another destination like "Bali" or "Paris".
+                    </div>
+                </div>`;
+            return;
+        }
+        
+        photos.forEach((photo, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-lg-4 col-md-6';
+            col.innerHTML = `
+                <div class="destination-card h-100">
+                    <div class="position-relative overflow-hidden">
+                        <img src="${photo.url}" class="destination-img" alt="${photo.alt}">
+                        <div class="img-overlay">
+                            <h4 class="mb-2">${query.charAt(0).toUpperCase() + query.slice(1)}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-map-marker-alt me-1"></i> ${photo.location}</span>
+                                <a href="${photo.photographerUrl}" target="_blank" class="photographer-badge text-white text-decoration-none">
+                                    <i class="fas fa-camera me-1"></i> ${photo.photographer}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h5 class="mb-3">${getPackageName(index)} Vacation Package</h5>
+                        <p class="text-muted mb-4">${getPackageDescription(query, index)}</p>
+                        <button class="btn btn-primary view-package-btn w-100">
+                            View Package Details <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>`;
+            container.appendChild(col);
+        });
+    }
+    
+    function getPackageName(index) {
+        const names = ['Premium', 'Luxury', 'Deluxe'];
+        return names[index] || 'Exclusive';
+    }
+    
+    function getPackageDescription(query, index) {
+        const descriptions = [
+            `Experience the best of ${query} with our all-inclusive premium package.`,
+            `Luxury accommodations and private tours in beautiful ${query}.`,
+            `Deluxe vacation package featuring top-rated ${query} attractions.`
+        ];
+        return descriptions[index] || `Amazing vacation package for ${query}.`;
+    }
+    
+    function showAlert(message, type) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.role = 'alert';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        const container = document.getElementById('searchResults');
+        container.prepend(alert);
+        
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        }, 5000);
+    }
+    </script>
     </div>
     <!-- Navbar & Hero End -->
 <!-- Contact Start -->
