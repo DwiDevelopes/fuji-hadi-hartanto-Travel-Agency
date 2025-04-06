@@ -1,0 +1,19 @@
+{
+  "name": "fuji-hadi-hartanto-travel-agency",
+  "version": "1.0.0",
+  "description": "Dokumen ini mencakup layanan yang disediakan oleh **Fuji Hadi Hartanto**. Layanan meliputi, namun tidak terbatas pada:\r - Pengembangan perangkat lunak khusus.\r - Konsultasi teknologi informasi.\r - Pemeliharaan dan dukungan teknis.\r - Pengembangan aplikasi web dan mobile.\r - Integrasi sistem dan solusi berbasis cloud.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "privacy": "^1.0.2"
+  }
+}

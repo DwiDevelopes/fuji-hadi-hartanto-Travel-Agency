@@ -6,6 +6,20 @@
     --dark: #14141F;
 }
 
+script[src*="jquery.min.js"] {
+    display: none !important;
+}
+
+::-webkit-scrollbar {
+   display :none;
+}
+::-webkit-scrollbar-track {
+    display :none;
+}
+::-webkit-scrollbar-thumb {
+    display :none;
+}
+
 .fw-medium {
     font-weight: 600 !important;
 }
