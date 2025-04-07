@@ -251,6 +251,29 @@
         </div>
     </nav>
 
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const navItems = document.querySelectorAll('.nav-links li');
+    
+        hamburger.addEventListener('click', () => {
+            // Toggle nav
+            navLinks.classList.toggle('open');
+            
+            // Animate links
+            navItems.forEach((link, index) => {
+                if (link.style.animation) {
+                    link.style.animation = '';
+                } else {
+                    link.style.animation = `navLinkFade 0.4s ease forwards ${index / 7 + 0.2}s`;
+                }
+            });
+            
+            // Hamburger animation
+            hamburger.classList.toggle('toggle');
+        });
+    </script>
+
     <div class="container-fluid bg-primary py-5 mb-5 hero-header">
         <div class="container py-5">
             <div class="row justify-content-center py-5">
