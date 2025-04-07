@@ -1,0 +1,274 @@
+function doPost(e) {
+  // Pastikan request membawa data
+  if (!e || !e.postData || !e.postData.contents) {
+    return ContentService.createTextOutput(
+      JSON.stringify({result: 'error', message: 'No data received'})
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  try {
+    // Buka spreadsheet
+    const spreadsheetId = 'YOUR_SPREADSHEET_ID'; // Ganti dengan ID spreadsheet Anda
+    const sheetName = 'Reservations';
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    let sheet = spreadsheet.getSheetByName(sheetName);
+    
+    // Jika sheet tidak ada, buat baru dengan header
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(sheetName);
+      // Buat header dengan format yang lebih baik
+      const headers = [
+        'Timestamp', 
+        'Nama Lengkap', 
+        'Email', 
+        'Check-In Date', 
+        'Check-Out Date', 
+        'Tipe Kamar',
+        'Harga Kamar',
+        'Jumlah Malam',
+        'Total Harga',
+        'Number of Guests', 
+        'Payment Method', 
+        'Additional Amenities', 
+        'Special Requests',
+        'Status Pembayaran'
+      ];
+      
+      sheet.appendRow(headers);
+      
+      // Format header agar lebih menarik
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setBackground('#4a86e8')
+                .setFontColor('white')
+                .setFontWeight('bold')
+                .setVerticalAlignment('middle')
+                .setHorizontalAlignment('center');
+      
+      // Bekukan baris header
+      sheet.setFrozenRows(1);
+      
+      // Atur lebar kolom
+      sheet.setColumnWidth(1, 120); // Timestamp
+      sheet.setColumnWidth(2, 150); // Nama Lengkap
+      sheet.setColumnWidth(3, 180); // Email
+      sheet.setColumnWidths(4, 2, 100); // Check-In/Out Date
+      sheet.setColumnWidth(6, 150); // Tipe Kamar
+      sheet.setColumnWidth(7, 100); // Harga Kamar
+      sheet.setColumnWidth(8, 100); // Jumlah Malam
+      sheet.setColumnWidth(9, 120); // Total Harga
+      sheet.setColumnWidth(10, 100); // Number of Guests
+      sheet.setColumnWidth(11, 120); // Payment Method
+      sheet.setColumnWidth(12, 200); // Additional Amenities
+      sheet.setColumnWidth(13, 200); // Special Requests
+      sheet.setColumnWidth(14, 120); // Status Pembayaran
+    }
+    
+    // Parse data yang diterima
+    const data = JSON.parse(e.postData.contents);
+    
+    // Ekstrak harga dari tipe kamar (jika ada format "Tipe Kamar - Rp X.XXX.XXX")
+    let roomPrice = 0;
+    let roomType = data.roomType || '';
+    if (roomType.includes('- Rp')) {
+      const pricePart = roomType.split('- Rp')[1].trim();
+      roomPrice = parseInt(pricePart.replace(/[^\d]/g, '')) || 0;
+      roomType = roomType.split('- Rp')[0].trim();
+    }
+    
+    // Hitung jumlah malam dan total harga
+    let nights = 0;
+    let totalPrice = 0;
+    if (data.checkInDate && data.checkOutDate) {
+      const checkIn = new Date(data.checkInDate);
+      const checkOut = new Date(data.checkOutDate);
+      nights = Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+      totalPrice = nights * roomPrice;
+    }
+    
+    // Format data untuk spreadsheet
+    const rowData = [
+      new Date(), // Timestamp
+      data.guestName || '',
+      data.guestEmail || '',
+      data.checkInDate || '',
+      data.checkOutDate || '',
+      roomType, // Tipe kamar tanpa harga
+      roomPrice, // Harga kamar per malam (angka saja)
+      nights, // Jumlah malam
+      totalPrice, // Total harga
+      data.guests || '',
+      data.paymentMethod || '',
+      data.amenities ? data.amenities.join(', ') : '', // Gabungkan amenities jika ada
+      data.notes || '',
+      'Pending' // Status pembayaran default
+    ];
+    
+    // Tambahkan data ke sheet
+    const lastRow = sheet.getLastRow() + 1;
+    sheet.getRange(lastRow, 1, 1, rowData.length).setValues([rowData]);
+    
+    // Format baris baru
+    const newRowRange = sheet.getRange(lastRow, 1, 1, rowData.length);
+    
+    // Format tanggal
+    sheet.getRange(lastRow, 1).setNumberFormat('yyyy-mm-dd hh:mm:ss');
+    sheet.getRange(lastRow, 4).setNumberFormat('yyyy-mm-dd');
+    sheet.getRange(lastRow, 5).setNumberFormat('yyyy-mm-dd');
+    
+    // Format mata uang untuk kolom harga
+    sheet.getRange(lastRow, 7).setNumberFormat('"Rp"#,##0');
+    sheet.getRange(lastRow, 9).setNumberFormat('"Rp"#,##0');
+    
+    // Format alternatif warna baris
+    if (lastRow % 2 === 0) {
+      newRowRange.setBackground('#f9f9f9');
+    }
+    
+    // Kirim email konfirmasi (opsional)
+    if (data.guestEmail) {
+      sendConfirmationEmail(data, roomType, roomPrice, nights, totalPrice);
+    }
+    
+    // Berikan response sukses
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        result: 'success', 
+        message: 'Reservation saved successfully',
+        reservationDetails: {
+          ...data,
+          roomType: roomType,
+          roomPrice: roomPrice,
+          nights: nights,
+          totalPrice: totalPrice
+        }
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    // Jika terjadi error
+    console.error('Error:', error);
+    return ContentService.createTextOutput(
+      JSON.stringify({result: 'error', message: error.message})
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Fungsi untuk mengirim email konfirmasi yang lebih informatif
+function sendConfirmationEmail(data, roomType, roomPrice, nights, totalPrice) {
+  try {
+    const recipient = data.guestEmail;
+    const subject = 'Konfirmasi Reservasi Hotel Anda';
+    
+    // Format harga ke Rupiah
+    const formatRupiah = (amount) => {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+      }).format(amount);
+    };
+    
+    const body = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #4a86e8; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">Konfirmasi Reservasi</h1>
+        </div>
+        
+        <div style="padding: 20px;">
+          <p style="font-size: 16px;">Terima kasih telah melakukan reservasi di hotel kami. Berikut detail reservasi Anda:</p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold; width: 40%;">Nama Lengkap</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.guestName || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tanggal Check-In</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.checkInDate || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tanggal Check-Out</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.checkOutDate || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tipe Kamar</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${roomType || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Harga per Malam</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${formatRupiah(roomPrice)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Jumlah Malam</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${nights}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Total Harga</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">${formatRupiah(totalPrice)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Jumlah Tamu</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.guests || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Metode Pembayaran</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.paymentMethod || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Fasilitas Tambahan</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.amenities ? data.amenities.join(', ') : 'Tidak ada'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Permintaan Khusus</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${data.notes || 'Tidak ada'}</td>
+            </tr>
+          </table>
+          
+          <p style="font-size: 14px; color: #666;">
+            Kami akan menghubungi Anda dalam waktu 1x24 jam untuk konfirmasi lebih lanjut dan proses pembayaran.
+            Jika Anda memiliki pertanyaan, silakan hubungi kami di reservations@hotelanda.com atau +62 21 12345678.
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #888;">
+            <p>Hormat kami,<br><strong>Tim Reservasi Hotel Anda</strong></p>
+            <p style="font-size: 12px;">Email ini dikirim otomatis, mohon tidak membalas.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    MailApp.sendEmail({
+      to: recipient,
+      subject: subject,
+      htmlBody: body,
+      name: 'Hotel Reservation System'
+    });
+    
+  } catch (emailError) {
+    console.error('Gagal mengirim email konfirmasi:', emailError);
+  }
+}
+
+// Fungsi untuk testing dari script editor
+function testDoPost() {
+  // Simulasikan data POST
+  const e = {
+    postData: {
+      contents: JSON.stringify({
+        guestName: "John Doe",
+        guestEmail: "john@example.com",
+        checkInDate: "2023-12-15",
+        checkOutDate: "2023-12-20",
+        roomType: "Deluxe Room - Rp 1.200.000/malam",
+        guests: "2",
+        paymentMethod: "creditCard",
+        amenities: ["breakfast", "wifi"],
+        notes: "Minta kamar lantai atas"
+      })
+    }
+  };
+  
+  // Jalankan doPost
+  const result = doPost(e);
+  Logger.log(result.getContent());
+}
