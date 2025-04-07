@@ -1,0 +1,171 @@
+function doPost(e) {
+  try {
+    // Pastikan data dikirim
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "No data received"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Parse data yang diterima
+    const data = JSON.parse(e.postData.contents);
+    
+    // Validasi data wajib
+    if (!data.guestName || !data.guestEmail || !data.checkInDate || !data.checkOutDate || 
+        !data.roomType || !data.guests || !data.paymentMethod) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Missing required fields"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Validasi email
+    if (!isValidEmail(data.guestEmail)) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Invalid email format"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Validasi tanggal
+    const checkInDate = new Date(data.checkInDate);
+    const checkOutDate = new Date(data.checkOutDate);
+    
+    if (checkInDate >= checkOutDate) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Check-out date must be after check-in date"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Buka spreadsheet
+    const spreadsheetId = "YOUR_SPREADSHEET_ID"; // Ganti dengan ID spreadsheet Anda
+    const sheetName = "Reservations"; // Nama sheet
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    let sheet = spreadsheet.getSheetByName(sheetName);
+    
+    // Jika sheet tidak ada, buat baru
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(sheetName);
+      // Buat header
+      sheet.appendRow([
+        "Timestamp", 
+        "Nama Tamu", 
+        "Email", 
+        "Check-in", 
+        "Check-out", 
+        "Jenis Kamar", 
+        "Jumlah Tamu", 
+        "Metode Pembayaran", 
+        "Fasilitas Tambahan", 
+        "Catatan",
+        "Status"
+      ]);
+    }
+    
+    // Format fasilitas tambahan
+    let amenities = [];
+    if (data.amenities) {
+      if (Array.isArray(data.amenities)) {
+        amenities = data.amenities;
+      } else {
+        amenities = [data.amenities];
+      }
+    }
+    
+    // Tambahkan data ke sheet
+    sheet.appendRow([
+      new Date(), // Timestamp
+      data.guestName,
+      data.guestEmail,
+      data.checkInDate,
+      data.checkOutDate,
+      data.roomType,
+      data.guests,
+      data.paymentMethod,
+      amenities.join(", "),
+      data.notes || "",
+      "Pending" // Status awal
+    ]);
+    
+    // Kirim email konfirmasi (opsional)
+    sendConfirmationEmail(data);
+    
+    // Return response sukses
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      message: "Reservation submitted successfully"
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    // Tangani error
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Fungsi untuk validasi email
+function isValidEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+// Fungsi untuk mengirim email konfirmasi
+function sendConfirmationEmail(data) {
+  try {
+    const subject = "Konfirmasi Reservasi Hotel Anda";
+    const body = `
+      <h2>Terima kasih atas reservasi Anda!</h2>
+      <p>Berikut detail reservasi Anda:</p>
+      <ul>
+        <li><strong>Nama:</strong> ${data.guestName}</li>
+        <li><strong>Email:</strong> ${data.guestEmail}</li>
+        <li><strong>Check-in:</strong> ${data.checkInDate}</li>
+        <li><strong>Check-out:</strong> ${data.checkOutDate}</li>
+        <li><strong>Jenis Kamar:</strong> ${data.roomType}</li>
+        <li><strong>Jumlah Tamu:</strong> ${data.guests}</li>
+        <li><strong>Metode Pembayaran:</strong> ${data.paymentMethod}</li>
+        ${data.amenities ? `<li><strong>Fasilitas Tambahan:</strong> ${Array.isArray(data.amenities) ? data.amenities.join(", ") : data.amenities}</li>` : ''}
+      </ul>
+      ${data.notes ? `<p><strong>Catatan:</strong> ${data.notes}</p>` : ''}
+      <p>Kami akan segera memproses reservasi Anda dan mengirimkan konfirmasi lebih lanjut.</p>
+      <p>Hormat kami,<br>Tim Hotel</p>
+    `;
+    
+    MailApp.sendEmail({
+      to: data.guestEmail,
+      subject: subject,
+      htmlBody: body
+    });
+    
+  } catch (error) {
+    console.error("Gagal mengirim email konfirmasi:", error);
+  }
+}
+
+// Fungsi untuk testing (opsional)
+function testDoPost() {
+  const testData = {
+    guestName: "John Doe",
+    guestEmail: "john@example.com",
+    checkInDate: "2023-12-15",
+    checkOutDate: "2023-12-20",
+    roomType: "double",
+    guests: "2",
+    paymentMethod: "creditCard",
+    amenities: ["breakfast", "wifi"],
+    notes: "Mohon kamar di lantai atas"
+  };
+  
+  const e = {
+    postData: {
+      contents: JSON.stringify(testData)
+    }
+  };
+  
+  const result = doPost(e);
+  Logger.log(result.getContent());
+}

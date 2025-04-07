@@ -1,0 +1,276 @@
+.wwt-booking-widget {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 28px 32px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E2E8F0;
+  }
+  
+  .wwt-header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .wwt-title {
+    color: #1A365D;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .wwt-subtitle {
+    color: #718096;
+    font-size: 14px;
+    margin: 0;
+  }
+  
+  .wwt-date-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .wwt-form-row {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .wwt-form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .wwt-form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1A365D;
+    font-size: 14px;
+  }
+  
+  .wwt-label-icon {
+    flex-shrink: 0;
+  }
+  
+  .wwt-date-input-container {
+    position: relative;
+  }
+  
+  .wwt-date-input {
+    width: 100%;
+    padding: 14px 16px 14px 42px;
+    border: 1px solid #CBD5E0;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #1A365D;
+    background-color: #FFFFFF;
+    transition: all 0.25s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    height: 48px;
+  }
+  
+  .wwt-date-input:hover {
+    border-color: #90CDF4;
+  }
+  
+  .wwt-date-input:focus {
+    outline: none;
+    border-color: #3182CE;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+  }
+  
+  .wwt-date-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  
+  .wwt-form-footer {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .wwt-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background-color: #86B817;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .wwt-submit-btn:hover {
+    background-color: #86B817;
+    transform: translateY(-1px);
+  }
+  
+  .wwt-submit-btn:active {
+    transform: translateY(0);
+  }
+  
+  .wwt-arrow-icon {
+    transition: transform 0.2s ease;
+  }
+  
+  .wwt-submit-btn:hover .wwt-arrow-icon {
+    transform: translateX(3px);
+  }
+  
+  /* Custom styling for date picker dropdown */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .wwt-booking-widget {
+      padding: 24px;
+    }
+    
+    .wwt-form-row {
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .wwt-title {
+      font-size: 20px;
+    }
+    
+    .wwt-date-input {
+      padding: 12px 14px 12px 40px;
+      height: 44px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .wwt-booking-widget {
+      padding: 20px;
+      border-radius: 10px;
+    }
+    
+    .wwt-title {
+      font-size: 18px;
+    }
+    
+    .wwt-submit-btn {
+      padding: 12px 24px;
+      font-size: 15px;
+    }
+  }
+  ::-webkit-scrollbar {
+    display :none;
+ }
+ ::-webkit-scrollbar-track {
+     display :none;
+ }
+ ::-webkit-scrollbar-thumb {
+     display :none;
+ }
+
+ .back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 99;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+  }
+  
+  .back-to-top.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .back-to-top:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.4);
+  }
+  
+  .plane-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+  }
+  
+  .back-to-top:hover .plane-container {
+    transform: translateY(-5px);
+  }
+  
+  .plane-trail {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    width: 4px;
+    height: 0;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: height 0.3s ease;
+  }
+  
+  .back-to-top:hover .plane-trail {
+    height: 15px;
+  }
+  
+  /* Take-off animation */
+  @keyframes takeOff {
+    0% {
+        transform: translateY(0) rotate(0);
+    }
+    50% {
+        transform: translateY(-20px) rotate(-10deg);
+    }
+    100% {
+        transform: translateY(-40px) rotate(-20deg);
+    }
+  }
+  
+  .back-to-top:active .bi-airplane {
+    animation: takeOff 0.5s ease-out forwards;
+  }
+  
+  /* Floating animation when visible */
+  @keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+  }
+  
+  .back-to-top.active .plane-container {
+    animation: float 3s ease-in-out infinite;
+  }

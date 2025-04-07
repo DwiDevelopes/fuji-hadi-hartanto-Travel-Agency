@@ -1,0 +1,198 @@
+<div class="delivery-success-container">
+    <div class="success-card">
+      <div class="success-header">
+        <svg class="success-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path fill="#4CAF50" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        <h2>Pengiriman Berhasil!</h2>
+      </div>
+      
+      <div class="success-details">
+        <div class="detail-row">
+          <span class="detail-label">Pengiriman Pesan : </span>
+          <span class="detail-value">fujihadi1997@gmail.com</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Pengiriman:</span>
+          <span class="detail-value">Host Pengirimanan Travel</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Tujuan:</span>
+          <span class="detail-value">Pengiriman Pemesanan Travel</span>
+        </div>
+      </div>
+      
+      <div class="progress-tracker">
+        <div class="progress-step completed">
+          <div class="step-icon">1</div>
+          <div class="step-label">Pesan Diproses</div>
+        </div>
+        <div class="progress-step completed">
+          <div class="step-icon">2</div>
+          <div class="step-label">Mysql Database Proses</div>
+        </div>
+        <div class="progress-step current">
+          <div class="step-icon">3</div>
+          <div class="step-label">Terkirim Databases Mysql</div>
+        </div>
+      </div>
+      <button class="secondary-button">Sucessfuly</button>
+    </div>
+  </div>
+  <style>
+    .delivery-success-container {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+        padding: 20px;
+      }
+      
+      .success-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 32px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+      }
+      
+      .success-header {
+        margin-bottom: 24px;
+      }
+      
+      .success-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+      }
+      
+      .success-card h2 {
+        color: #4CAF50;
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      .success-details {
+        text-align: left;
+        margin: 24px 0;
+        padding: 16px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+      
+      .detail-row {
+        display: flex;
+        margin-bottom: 12px;
+      }
+      
+      .detail-row:last-child {
+        margin-bottom: 0;
+      }
+      
+      .detail-label {
+        font-weight: 600;
+        color: #555;
+        min-width: 120px;
+      }
+      
+      .detail-value {
+        color: #333;
+      }
+      
+      .progress-tracker {
+        display: flex;
+        justify-content: space-between;
+        margin: 32px 0;
+        position: relative;
+      }
+      
+      .progress-tracker:before {
+        content: '';
+        position: absolute;
+        top: 16px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #e0e0e0;
+        z-index: 1;
+      }
+      
+      .progress-step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+      }
+      
+      .step-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-weight: 600;
+      }
+      
+      .progress-step.completed .step-icon {
+        background: #4CAF50;
+        color: white;
+      }
+      
+      .progress-step.current .step-icon {
+        background: #4CAF50;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2);
+      }
+      
+      .step-label {
+        font-size: 12px;
+        color: #999;
+      }
+      
+      .progress-step.completed .step-label,
+      .progress-step.current .step-label {
+        color: #333;
+      }
+      
+      .primary-button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: background 0.3s;
+      }
+      
+      .primary-button:hover {
+        background: #43A047;
+      }
+      
+      .secondary-button {
+        background: white;
+        color: #4CAF50;
+        border: 1px solid #4CAF50;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s;
+      }
+      
+      .secondary-button:hover {
+        background: #f5f5f5;
+      }
+  </style>

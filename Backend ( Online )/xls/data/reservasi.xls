@@ -1,0 +1,58 @@
+function doPost(e) {
+  try {
+    var ss = SpreadsheetApp.openById('2oFFaFiGNRDDGFkp56mvQJLAXovsuzcAijbguCb6xQ41');
+    var sheet = ss.getSheetByName('DataReservasi');
+    
+    var data = JSON.parse(e.postData.contents);
+    
+    // Validasi input
+    if (!data.guestName || !data.guestEmail) {
+      throw new Error("Nama dan email harus diisi");
+    }
+    
+    // Handle fasilitas tambahan
+    var amenities = [];
+    if (data.breakfast) amenities.push("Sarapan");
+    if (data.parking) amenities.push("Parkir");
+    if (data.wifi) amenities.push("WiFi Premium");
+    var amenitiesStr = amenities.join(", ");
+    
+    // Format tanggal
+    var formattedCheckIn = formatDate(data.checkInDate);
+    var formattedCheckOut = formatDate(data.checkOutDate);
+    
+    var newRow = [
+      data.guestName,       // Nama Tamu
+      data.guestEmail,      // Email
+      formattedCheckIn,     // Check-in
+      formattedCheckOut,    // Check-out
+      data.roomType,       // Jenis Kamar
+      data.guests,          // Jumlah Tamu
+      data.paymentMethod,   // Metode Pembayaran
+      amenitiesStr,         // Fasilitas Tambahan
+      data.notes || '',     // Catatan (opsional)
+      new Date(),           // Tanggal Reservasi
+      "Pending"            // Status Reservasi
+    ];
+    
+    sheet.appendRow(newRow);
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: "success",
+      message: "Reservasi berhasil dikirim"
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: "error",
+      message: error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Fungsi bantu untuk format tanggal
+function formatDate(dateString) {
+  if (!dateString) return '';
+  var date = new Date(dateString);
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), "dd/MM/yyyy");
+}
