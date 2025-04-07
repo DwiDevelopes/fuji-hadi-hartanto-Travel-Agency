@@ -1163,45 +1163,42 @@
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <div class="form-floating position-relative">
-                                                <textarea class="form-control" placeholder="Special Request"
-                                                    id="message" name="special_requests" style="height: 100px"
-                                                    maxlength="500"></textarea>
-                                                <label for="message" class="form-label">Special Requests</label>
-                                                <small class="text-muted position-absolute end-0 bottom-0 mb-2 me-3">
-                                                    <span id="charCount">0</span>/500
-                                                </small>
+                                           
+                                            <div class="g-recaptcha mb-3" data-sitekey="6LcD8QwrAAAAAJk2uiwAGHicaOW-CUF1q8YejUtX"></div>
+                                            
+                                            <!-- Error message -->
+                                            <div id="recaptcha-error" class="text-danger mb-2" style="display:none;">
+                                                Please complete the reCAPTCHA verification
                                             </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="privacyPolicy"
-                                                    required>
-                                                <label class="form-check-label small" for="privacyPolicy">
-                                                    I agree to the <a href="/privacy-policy" target="_blank"
-                                                        class="text-decoration-underline">Privacy Policy</a> and
-                                                    <a href="/terms" target="_blank"
-                                                        class="text-decoration-underline">Terms of Service</a>
-                                                </label>
-                                                <div class="invalid-feedback">You must agree to continue</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <!-- reCAPTCHA Integration -->
-                                            <div class="g-recaptcha mb-3" data-sitekey="YourSiteKey"></div>
-                                            <button class="btn btn-primary w-100 py-3 fw-bold" type="submit"
-                                                id="submitBtn">
+                                            
+                                            <button class="btn btn-primary w-100 py-3 fw-bold" type="submit" id="submitBtn">
                                                 <span class="submit-text">Secure Your Booking</span>
-                                                <span class="spinner-border spinner-border-sm d-none" role="status"
-                                                    aria-hidden="true"></span>
+                                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                             </button>
                                         </div>
-                                        <div class="col-12 text-center">
-                                            <div class="d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-lock text-success me-2"></i>
-                                                <small class="text-muted">
-                                                    SSL secured connection
-                                                </small>
+                                        
+                                        <!-- PASTIKAN LOAD SCRIPT reCAPTCHA DENGAN BENAR -->
+                                        <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+                                        
+                                        <script>
+                                        // Callback ketika reCAPTCHA siap
+                                        var onloadCallback = function() {
+                                            console.log("reCAPTCHA loaded");
+                                        };
+                                        
+                                        // Validasi sebelum submit
+                                        document.getElementById('submitBtn').addEventListener('click', function(e) {
+                                            const response = grecaptcha.getResponse();
+                                            if(response.length === 0) {
+                                                e.preventDefault();
+                                                document.getElementById('recaptcha-error').style.display = 'block';
+                                            } else {
+                                                // Tampilkan loading
+                                                this.querySelector('.submit-text').classList.add('d-none');
+                                                this.querySelector('.spinner-border').classList.remove('d-none');
+                                            }
+                                        });
+                                        </script>
                                             </div>
                                         </div>
                                     </div>
