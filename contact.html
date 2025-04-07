@@ -237,11 +237,11 @@
         <a href="#" class="logo">FujiHadi<span>Travel</span></a>
         
         <ul class="nav-links">
-        <li><a href="index.php">Home</a></li>
-            <li><a href="hotel_find.php">Destinations</a></li>
-            <li><a href="hotel_pilihan.php">Hotels</a></li>
-            <li><a href="about.php">About</a></li>
-            <li><a href="contact.php">Contact</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="hotel_find.html">Destinations</a></li>
+            <li><a href="hotel_pilihan.html">Hotels</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
         </ul>
         
         <div class="hamburger">
@@ -273,6 +273,7 @@
             hamburger.classList.toggle('toggle');
         });
     </script>
+
     <div class="container-fluid bg-primary py-5 mb-5 hero-header">
         <div class="container py-5">
             <div class="row justify-content-center py-5">
@@ -290,12 +291,6 @@
                         </button>
                     </div>
                     <div id="searchResults" class="row mt-5 g-4 justify-content-center"></div>
-                    
-                    <!-- Featured Destinations Section -->
-                    <div class="mt-5 pt-5">
-                        <h2 class="text-white mb-4">Popular Destinations</h2>
-                        <div id="featuredDestinations" class="row g-4 justify-content-center"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -351,115 +346,11 @@
             border-color: var(--bs-primary);
             color: var(--bs-primary) !important;
         }
-        .featured-card {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            height: 300px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        .featured-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-        }
-        .featured-img {
-            height: 100%;
-            width: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .featured-card:hover .featured-img {
-            transform: scale(1.1);
-        }
-        .featured-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-            padding: 20px;
-            color: white;
-        }
-        .featured-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .featured-location {
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-        }
     </style>
     
     <script>
     // Replace with your actual Unsplash Access Key
     const UNSPLASH_ACCESS_KEY = 'bNf1fq2p6XENfQnZ6KAne40raJcwkzxFs4DWTvZHuY8'; 
-    
-    // Popular destinations to show by default
-    const POPULAR_DESTINATIONS = ['Bali', 'Paris', 'Tokyo', 'New York', 'Santorini', 'Switzerland'];
-    
-    // Load featured destinations when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        loadFeaturedDestinations();
-    });
-    
-    async function loadFeaturedDestinations() {
-        const container = document.getElementById('featuredDestinations');
-        
-        try {
-            // Show loading state
-            container.innerHTML = `
-                <div class="col-12 text-center py-3">
-                    <div class="spinner-border text-light" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>`;
-            
-            // Fetch photos for each popular destination
-            const destinationPromises = POPULAR_DESTINATIONS.map(dest => 
-                fetchUnsplashPhotos(dest, 1).then(photos => ({
-                    destination: dest,
-                    photo: photos[0] // Get first photo for each destination
-                }))
-            );
-            
-            const destinations = await Promise.all(destinationPromises);
-            
-            // Display featured destinations
-            container.innerHTML = '';
-            destinations.forEach((item, index) => {
-                const col = document.createElement('div');
-                col.className = 'col-lg-4 col-md-6';
-                col.innerHTML = `
-                    <div class="featured-card h-100">
-                        <img src="${item.photo.url}" class="featured-img" alt="${item.photo.alt}">
-                        <div class="featured-overlay">
-                            <h3 class="featured-title">${item.destination}</h3>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="featured-location">
-                                    <i class="fas fa-map-marker-alt me-2"></i> ${item.photo.location || 'Exotic Destination'}
-                                </span>
-                                <a href="${item.photo.photographerUrl}" target="_blank" class="photographer-badge text-white text-decoration-none">
-                                    <i class="fas fa-camera me-1"></i> ${item.photo.photographer}
-                                </a>
-                            </div>
-                        </div>
-                    </div>`;
-                container.appendChild(col);
-            });
-            
-        } catch (error) {
-            console.error('Error loading featured destinations:', error);
-            container.innerHTML = `
-                <div class="col-12 text-center py-3">
-                    <div class="alert alert-warning">
-                        Couldn't load featured destinations. Please try refreshing the page.
-                    </div>
-                </div>`;
-        }
-    }
     
     async function searchDestination() {
         const query = document.getElementById('destinationSearch').value.trim();
@@ -472,7 +363,7 @@
         showLoadingState(resultsContainer, query);
         
         try {
-            const photos = await fetchUnsplashPhotos(query, 12);  // Changed count to 12
+            const photos = await fetchUnsplashPhotos(query);
             displayResults(resultsContainer, query, photos);
         } catch (error) {
             console.error('Search error:', error);
@@ -480,95 +371,6 @@
             resultsContainer.innerHTML = '';
         }
     }
-    
-    async function fetchUnsplashPhotos(query, count = 12) {  // Changed count to 12
-        const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query + ' vacation')}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=${count}&orientation=landscape`;
-        
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
-        }
-        
-        const data = await response.json();
-        return data.results.map(photo => ({
-            url: photo.urls.regular,
-            alt: photo.alt_description || query + ' vacation',
-            photographer: photo.user.name,
-            photographerUrl: photo.user.links.html,
-            location: photo.location?.title || 'Exotic Destination'
-        }));
-    }
-    
-    function displayResults(container, query, photos) {
-        container.innerHTML = '';
-        
-        if (!photos || photos.length === 0) {
-            container.innerHTML = `
-                <div class="col-12 text-center py-3">
-                    <div class="alert alert-warning">
-                        No results found for "${query}". Try another destination like "Bali" or "Paris".
-                    </div>
-                </div>`;
-            return;
-        }
-        
-        photos.forEach((photo, index) => {
-            const col = document.createElement('div');
-            col.className = 'col-lg-4 col-md-6';
-            col.innerHTML = `
-                <div class="destination-card h-100">
-                    <div class="position-relative overflow-hidden">
-                        <img src="${photo.url}" class="destination-img" alt="${photo.alt}">
-                        <div class="img-overlay">
-                            <h4 class="mb-2">${query.charAt(0).toUpperCase() + query.slice(1)}</h4>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-map-marker-alt me-1"></i> ${photo.location}</span>
-                                <a href="${photo.photographerUrl}" target="_blank" class="photographer-badge text-white text-decoration-none">
-                                    <i class="fas fa-camera me-1"></i> ${photo.photographer}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h5 class="mb-3">${getPackageName(index)} Vacation Package</h5>
-                        <p class="text-muted mb-4">${getPackageDescription(query, index)}</p>
-                        <button class="btn btn-primary view-package-btn w-100" onclick="window.location.href='${photo.photographerUrl}'">
-                            View Package Details <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                        <button class="btn btn-link text-decoration-none w-100 mt-2" onclick="toggleReadMore(${index})">
-                            Read More <i class="fas fa-arrow-down ms-2"></i>
-                        </button>
-                        <div id="more-info-${index}" class="mt-2 text-muted" style="display: none;">
-                            <p>Here is more information about the ${query} vacation package. This includes everything from travel dates to included amenities and more!</p>
-                        </div>
-                    </div>
-                </div>`;
-            container.appendChild(col);
-        });
-    }
-    
-    function toggleReadMore(index) {
-        const infoDiv = document.getElementById(`more-info-${index}`);
-        if (infoDiv.style.display === 'none') {
-            infoDiv.style.display = 'block';
-        } else {
-            infoDiv.style.display = 'none';
-        }
-    }
-    
-    function getPackageName(index) {
-        const names = ['Premium', 'Luxury', 'Deluxe'];
-        return names[index] || 'Exclusive';
-    }
-    
-    function getPackageDescription(query, index) {
-        const descriptions = [
-            `Experience the best of ${query} with our all-inclusive premium package.`,
-            `Luxury accommodations and private tours in beautiful ${query}.`,
-            `Deluxe vacation package featuring top-rated ${query} attractions.`
-        ];
-        return descriptions[index] || `Amazing vacation package for ${query}.`;
-    }    
     
     function showLoadingState(container, query) {
         container.innerHTML = `
@@ -580,8 +382,8 @@
             </div>`;
     }
     
-    async function fetchUnsplashPhotos(query, count = 3) {
-        const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query + ' vacation')}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=${count}&orientation=landscape`;
+    async function fetchUnsplashPhotos(query) {
+        const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query + ' vacation')}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=3&orientation=landscape`;
         
         const response = await fetch(url);
         if (!response.ok) {
@@ -672,6 +474,89 @@
         }, 5000);
     }
     </script>
+    </div>
+    <!-- Navbar & Hero End -->
+<!-- Contact Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Contact Us</h6>
+            <h1 class="mb-5">Get In Touch</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle" style="width: 60px; height: 60px;">
+                        <i class="fa fa-map-marker-alt text-white fs-4"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Office</h5>
+                        <p class="mb-0">123 Travel Street, Jakarta, Indonesia</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle" style="width: 60px; height: 60px;">
+                        <i class="fa fa-phone-alt text-white fs-4"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Mobile</h5>
+                        <p class="mb-0">+62 812 2236 2344</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle" style="width: 60px; height: 60px;">
+                        <i class="fa fa-envelope-open text-white fs-4"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Email</h5>
+                        <p class="mb-0">fujihadi1997@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="rounded overflow-hidden">
+                    <iframe class="position-relative rounded w-100 h-100" 
+                        src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3965.7021221468235!2d106.61288807475128!3d-6.302813993686355!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwMTgnMTAuMSJTIDEwNsKwMzYnNTUuNyJF!5e0!3m2!1sid!2sid!4v1744022391137!5m2!1sid!2sid"
+                        frameborder="0" style="min-height: 300px; border:0;" allowfullscreen="" aria-hidden="false"
+                        tabindex="0"></iframe>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
+    <form action="php/process_form.php" method="POST" id="reservationForm">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                    <label for="name">Your Name</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
+                    <label for="email">Your Email</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
+                    <label for="subject">Subject</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-floating">
+                    <textarea class="form-control" placeholder="Leave a message here" id="message" name="message" style="height: 150px" required></textarea>
+                    <label for="message">Message</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+            </div>
+        </div>
+    </form>
+</div>
+        </div>
+    </div>
+</div>
 <!-- Contact End -->
 
 <!-- Social Media End -->
